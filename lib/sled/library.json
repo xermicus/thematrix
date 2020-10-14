@@ -1,0 +1,20 @@
+{
+    "name": "SLED",
+    "keywords": "LED",
+    "description": "Satanic/Sexy/Stupid/Silly/Shiny LED matrix controller ",
+    "repository":
+    {
+      "type": "git",
+      "url": "https://github.com/shinyblink/sled.git"
+    },
+    "authors":
+    [
+      {
+        "name": "Adrian vifino Pistol",
+        "email": "vifino@tty.sh",
+        "maintainer": true
+      }
+    ],
+    "version": "master",
+    "frameworks": "arduino"
+  }
