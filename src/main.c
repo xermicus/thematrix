@@ -4,9 +4,12 @@
 #include "driver/gpio.h"
 #include "sdkconfig.h"
 #include "esp32_digital_led_lib.h"
+#include "hsv2rgb.h"
 
 #define BLINK_GPIO 5
-#define MATRIX_GPIO 21
+#define MATRIX_GPIO 4
+
+#define MATRIX_SIZE 256
 
 
 // needed for sled
@@ -41,17 +44,47 @@ void app_main()
     gpio_set_direction(MATRIX_GPIO, GPIO_MODE_OUTPUT);
     gpio_set_level(MATRIX_GPIO, 0);
 
-    strand_t strand;
-    strand.rmtChannel = 0;strand.gpioNum = MATRIX_GPIO;
-    strand.ledType = LED_WS2812B_V3;
-    strand.brightLimit = 100;
-    strand.numPixels = 500;
-    strand.pixels = NULL;
-    if (!digitalLeds_initStrands(&strand, 1)) {
-        printf("init failure (digital led lib)");
-        //while (1) {}
+    strand_t pStrand;
+    pStrand.rmtChannel = 0;  
+    pStrand.gpioNum = MATRIX_GPIO;
+    pStrand.ledType = LED_WS2812B_V2;
+    pStrand.brightLimit = 256;
+    pStrand.numPixels = MATRIX_SIZE;
+    pStrand.pixels = NULL;
+    if (digitalLeds_initStrands(&pStrand, 1)) {
+        while (1) {
+            printf("init failure (digital led lib)\n");
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+        }
     }
-    digitalLeds_resetPixels(&strand);
-    digitalLeds_updatePixels(&strand);
-    sled_task(NULL, -1);
+    digitalLeds_resetPixels(&pStrand);
+    digitalLeds_updatePixels(&pStrand);
+
+    int i;
+
+    while(1) {
+        for (i=0; i<MATRIX_SIZE; i++) {
+            pStrand.pixels[i].r = 255;
+            pStrand.pixels[i].g = 0;
+            pStrand.pixels[i].b = 0;
+        }
+        digitalLeds_updatePixels(&pStrand);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        for (i=0; i<MATRIX_SIZE; i++) {
+            pStrand.pixels[i].r = 0;
+            pStrand.pixels[i].g = 255;
+            pStrand.pixels[i].b = 0;
+        }
+        digitalLeds_updatePixels(&pStrand);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        for (i=0; i<MATRIX_SIZE; i++) {
+            pStrand.pixels[i].r = 0;
+            pStrand.pixels[i].g = 0;
+            pStrand.pixels[i].b = 255;
+        }
+        digitalLeds_updatePixels(&pStrand);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+    
+    //sled_task(NULL, -1);
 }
