@@ -38,35 +38,19 @@ static void sled_task(void *pvParameter)
     gpio_pad_select_gpio(MATRIX_GPIO);
     gpio_set_direction(MATRIX_GPIO, GPIO_MODE_OUTPUT);
     gpio_set_level(MATRIX_GPIO, 0);
-
-    strand_t pStrand;
-    pStrand.rmtChannel = 0;
-    pStrand.gpioNum = MATRIX_GPIO;
-    pStrand.ledType = LED_WS2812B_V3;
-    pStrand.brightLimit = 200;
-    pStrand.numPixels = MATRIX_SIZE;
-    pStrand.pixels = NULL;
-    if (digitalLeds_initStrands(&pStrand, 1))
-    {
-        while (1)
-        {
-            printf("init failure (digital led lib)\n");
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
-        }
-    }
-    digitalLeds_resetPixels(&pStrand);
-    digitalLeds_updatePixels(&pStrand);
-
     user_main(pvParameter, -1);
 }
 
 void app_main()
 {
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    printf("welcome to the matrix\n");
+
     xTaskCreate(&blink_task,              // task function
                 "blink_task",             // descriptive name of task
                 configMINIMAL_STACK_SIZE, // stack depth
                 NULL,                     // arguments passed to task function's pvParameter argument
-                1,                        // priority of the task
+                0,                        // priority of the task
                 NULL                      // created task handle
     );
 
@@ -74,7 +58,7 @@ void app_main()
                 "sled_task",                   // descriptive name of task
                 configMINIMAL_STACK_SIZE * 12, // stack depth
                 NULL,                          // arguments passed to task function's pvParameter argument
-                10,                            // priority of the task
+                configMAX_PRIORITIES - 1,      // priority of the task
                 NULL                           // created task handle
     );
 }
